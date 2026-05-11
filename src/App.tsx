@@ -8,6 +8,8 @@ import { LoginScreen } from './components/login-screen'
 import { useAuthStore } from './stores/auth-store'
 import { useState } from 'react'
 import { Button } from './components/ui/button'
+import { useEffect, useRef } from 'react'
+import { useAISearch } from './hooks/use-ai-search'
 
 function HomePage() {
   return (
@@ -26,6 +28,20 @@ function HomePage() {
 function SearchPage() {
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') || ''
+  const { response, citations, isLoading, error, search } = useAISearch()
+  const hasSearched = useRef(false)
+
+  useEffect(() => {
+    if (query && !hasSearched.current) {
+      hasSearched.current = true
+      search(query)
+    }
+  }, [query, search])
+
+  // Reset when query changes
+  useEffect(() => {
+    hasSearched.current = false
+  }, [query])
 
   return (
     <div className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
@@ -44,11 +60,18 @@ function SearchPage() {
       ) : (
         /* Results Area */
         <div className="mt-8">
-          {/* TODO: We'll connect real data in Phase 3 */}
+          {/* Error */}
+          {error && (
+            <div className="mb-4 px-4 py-3 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+          
+          {/* AI Response */}
           <AIResponse 
-            text=""
-            citations={[]}
-            isLoading={true}
+            text={response}
+            citations={citations}
+            isLoading={isLoading}
           />
         </div>
       )}
