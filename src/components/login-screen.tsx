@@ -7,6 +7,7 @@ import { useAuthStore } from '../stores/auth-store'
 export function LoginScreen() {
   const { isFirstTime, unlock, setFirstTime } = useAuthStore()
   const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [apiKey, setApiKey] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -14,6 +15,21 @@ export function LoginScreen() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  {/* Username Input (Setup only) */}
+{isFirstTime && (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+      Username
+    </label>
+    <input
+      type="text"
+      value={username}
+      onChange={(e) => setUsername(e.target.value)}
+      placeholder="Choose a local username"
+      className="w-full h-11 px-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
+    />
+  </div>
+)}
   // Setup mode (first time)
   const handleSetup = async () => {
     setError('')
@@ -40,7 +56,7 @@ export function LoginScreen() {
       
       localStorage.setItem('querax_encrypted_key', encryptedKey)
       
-      unlock(apiKey.trim(), hashedPassword)
+      unlock(apiKey.trim(), hashedPassword, username || 'User')
     } catch (e) {
       setError('Something went wrong. Please try again.')
     } finally {

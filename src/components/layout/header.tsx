@@ -1,9 +1,8 @@
-import { Sun, Moon, Settings, Sparkles } from 'lucide-react'
+import { Sun, Moon, Settings, Sparkles, Lock } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useThemeStore } from '../../stores/theme-store'
-import { Link } from 'wouter'
-import { Lock } from 'lucide-react'
 import { useAuthStore } from '../../stores/auth-store'
+import { Link } from 'wouter'
 
 export function Header() {
   const { theme, toggle } = useThemeStore()
@@ -19,8 +18,8 @@ export function Header() {
           <Link href="/">
             <div className="flex items-center gap-2.5 cursor-pointer">
               {/* Logo Icon */}
-              <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/25">
-                <Sparkles className="h-4 w-4 text-pink-900" />
+              <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-pink-700 to-pink-500 shadow-lg shadow-pink-500/25">
+                <Sparkles className="h-4 w-4 text-white" />
               </div>
               {/* Brand Name */}
               <div className="flex items-baseline gap-1">
@@ -61,15 +60,23 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={lock}
                 className="gap-2 text-pink-700 hover:text-pink-900"
               >
                 <Settings className="h-4 w-4" />
                 <span className="text-sm font-medium">Settings</span>
-                <Lock className="h-4 w-4" />
-                <span className="text-sm font-medium">Lock</span>           
               </Button>
             </Link>
+
+            {/* Lock */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={lock}
+              className="gap-2 text-pink-700 hover:text-pink-900"
+            >
+              <Lock className="h-4 w-4" />
+              <span className="text-sm font-medium">Lock</span>
+            </Button>
           </div>
         </div>
       </div>
