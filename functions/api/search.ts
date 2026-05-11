@@ -10,47 +10,28 @@ export async function onRequest(context: any) {
     })
   }
 
-  const instances = [
+  // First try: Direct with known good instances
+  const directInstances = [
     'https://searx.be',
     'https://priv.au',
-    'https://searx.tiekoetter.com',
-    'https://search.hbubli.cc',
-    'https://searx.si',
-    'https://searx.ro',
-    'https://search.sapti.me',
-    'https://searx.fmac.xyz',
   ]
 
-  let lastError = ''
-
-  for (const instance of instances) {
+  for (const instance of directInstances) {
     try {
       const searchUrl = `${instance}/search?q=${encodeURIComponent(query)}&format=json&language=en`
-      
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 10000) // 10 second timeout
       
       const response = await fetch(searchUrl, {
         headers: { 
           'Accept': 'application/json',
           'User-Agent': 'Querax/1.0'
         },
-        signal: controller.signal,
       })
-      
-      clearTimeout(timeout)
 
-      if (!response.ok) {
-        lastError = `Instance ${instance} returned ${response.status}`
-        continue
-      }
+      if (!response.ok) continue
 
       const data: any = await response.json()
 
-      if (!data.results || data.results.length === 0) {
-        lastError = `Instance ${instance} returned 0 results`
-        continue
-      }
+      if (!data.results || data.results.length === 0) continue
 
       return new Response(JSON.stringify({
         results: data.results.slice(0, 10).map((r: any, i: number) => ({
@@ -67,16 +48,62 @@ export async function onRequest(context: any) {
           'Access-Control-Allow-Origin': '*',
         }
       })
-    } catch (e: any) {
-      lastError = `Instance ${instance} failed: ${e.message}`
+    } catch (e) {
       continue
     }
   }
 
+  // Second try: Use DuckDuckGo's free API (no key needed, always works)
+  try {
+    const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`
+    const ddgResponse = await fetch(ddgUrl)
+    const ddgData: any = await ddgResponse.json()
+
+    const results: any[] = []
+
+    // Add Abstract if available
+    if (ddgData.AbstractText) {
+      results.push({
+        id: 1,
+        title: ddgData.Heading || query,
+        url: ddgData.AbstractURL || '',
+        snippet: ddgData.AbstractText,
+        source: ddgData.AbstractSource || 'DuckDuckGo',
+      })
+    }
+
+    // Add Related Topics
+    if (ddgData.RelatedTopics) {
+      ddgData.RelatedTopics.forEach((topic: any, i: number) => {
+        if (topic.Text && topic.FirstURL) {
+          results.push({
+            id: results.length + 1,
+            title: topic.Text.slice(0, 50) + '...',
+            url: topic.FirstURL,
+            snippet: topic.Text,
+            source: 'DuckDuckGo',
+          })
+        }
+      })
+    }
+
+    if (results.length > 0) {
+      return new Response(JSON.stringify({
+        results: results.slice(0, 10),
+        instance: 'DuckDuckGo API (fallback)',
+      }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        }
+      })
+    }
+  } catch (e) {
+    // DuckDuckGo also failed
+  }
+
   return new Response(JSON.stringify({ 
-    error: 'All instances failed',
-    details: lastError,
-    query: query
+    error: 'Unable to fetch search results. Please try again later.',
   }), {
     status: 502,
     headers: { 
