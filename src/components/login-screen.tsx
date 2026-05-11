@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Key, Eye, EyeOff, ArrowRight, Shield, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight, Shield, AlertCircle } from 'lucide-react'
 import { Button } from './ui/button'
 import { encryptApiKey, decryptApiKey, hashPassword } from '../lib/utils/crypto'
 import { useAuthStore } from '../stores/auth-store'
