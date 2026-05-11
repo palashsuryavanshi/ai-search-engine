@@ -27,7 +27,7 @@ export async function searchSearXNG(query: string): Promise<{ results: SearchRes
   
   // Add related topics as search results
   if (data.RelatedTopics) {
-    data.RelatedTopics.forEach((topic: any, i: number) => {
+    data.RelatedTopics.forEach((topic: any) => {
       if (topic.Text && topic.FirstURL) {
         results.push({
           id: results.length + 1,
