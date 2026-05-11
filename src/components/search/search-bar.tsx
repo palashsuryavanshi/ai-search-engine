@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent } from 'react'
+import { useState, type KeyboardEvent } from 'react'
 import { Search } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useLocation } from 'wouter'
